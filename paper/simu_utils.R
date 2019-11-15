@@ -55,7 +55,7 @@ make_data <- function(n, setting = 1,
   if (setting == 3) truncdist::rtrunc(n, 'weibull', b = 16, shape = 1.7, scale = 7)
 }
 
-# Convert (T, U, cen) to survTP, optionally with disturbation
+# Convert (T, U, cen) to survTP, optionally with disturbance
 .TU_to_train <- function(TU, cen,
                          delay_detect = 0, prop_undetect = 0) {
   # delay detection by delay_detect * (U - T)

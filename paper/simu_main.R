@@ -123,6 +123,7 @@ ggplot(sched_tb) +
 
 ggsave("fig/simu-sched-CI.pdf", width = 8, height = 2.6)
 
+
 # plot mean, with percentile as confidence band (Figure 3)
 tidy_eval_res <- do.call(bind_rows, lapply(res_all, function(r) r$eval_tib)) %>%
   select(detect_rate, lag_mean, loss_mean, K:setting)
@@ -136,10 +137,10 @@ tidy_eval_res %>%
   gather(key, val, detect_rate, lag_mean, loss_mean) %>%
   mutate(key = factor(key, levels = c("loss_mean", "detect_rate", "lag_mean"))) %>%
   group_by(K, method, setting, key) %>%
-  summarise(median = mean(val),
+  summarise(mid = mean(val),
             hi = quantile(val, .975),
             lo = quantile(val, .025)) %>%
-  ggplot(aes(K, median, ymin = lo, ymax = hi)) +
+  ggplot(aes(K, mid, ymin = lo, ymax = hi)) +
   geom_hline(aes(yintercept = val_mean), data = res_current,
              color = "red", alpha = .8) +
   geom_hline(aes(yintercept = val), alpha = 0,
@@ -149,7 +150,7 @@ tidy_eval_res %>%
   geom_ribbon(aes(fill = method),
               alpha = .22) +
   geom_point(aes(color = method),
-             size = .5) +
+             size = .6) +
   geom_line(aes(color = method, linetype = method),
             alpha = .8) +
   scale_color_manual(values=c("unif95"="#D55E00", "unif90"="#E69F00", "DP"="#0088CC")) +
