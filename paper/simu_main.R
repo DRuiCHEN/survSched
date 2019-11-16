@@ -4,7 +4,7 @@ library(doParallel)
 registerDoParallel()
 
 library(survSched)
-source('simu_utils.R')
+source('utils.R')
 
 
 ## Simulation parameters ----------------------------------------
@@ -86,7 +86,7 @@ system.time({
 
 ## Plots ----------------------------------------
 # load stored results
-res_all <- read_rds("rds/simu_1to3_40020200.rds")
+res_all <- readRDS("rds/simu_1to3_40020200.rds")
 
 # Plot schedules (Figure 2)
 Ks <- c(6, 10, 14)

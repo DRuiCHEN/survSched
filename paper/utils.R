@@ -1,13 +1,14 @@
 library(TPmsm)
+library(dplyr)
 
 # Generate training set as a survTP
 make_data <- function(n, setting = 1,
                       censored = TRUE, cen_setting = 1,
-                      returnTU = FALSE) {
+                      returnTU = FALSE, ...) {
   TU <- .generate_TU(n, setting)
   if(returnTU) return(TU)
-  if (censored) cen <- .generate_C(n, cen_setting) else cen <- Inf
-  .TU_to_train(TU, cen)
+  if (censored) C <- .generate_C(n, cen_setting) else C <- Inf
+  .TU_to_train(TU, C, ...)
 }
 
 .hazfn <- function(t, x, betas) {
@@ -49,14 +50,14 @@ make_data <- function(n, setting = 1,
   cbind(t = t, u = u)
 }
 
-.generate_C <- function(n, setting = 0) {
+.generate_C <- function(n, setting = 1) {
   if (setting == 1) return(runif(n, 0, 16))
   if (setting == 2) return(16 - runif(n, 0, 4)^2)
   if (setting == 3) truncdist::rtrunc(n, 'weibull', b = 16, shape = 1.7, scale = 7)
 }
 
-# Convert (T, U, cen) to survTP, optionally with disturbance
-.TU_to_train <- function(TU, cen,
+# Convert (T, U, C) to survTP, optionally with disturbance
+.TU_to_train <- function(TU, C,
                          delay_detect = 0, prop_undetect = 0) {
   # delay detection by delay_detect * (U - T)
   if (delay_detect > 0) {
@@ -71,10 +72,10 @@ make_data <- function(n, setting = 1,
   }
   # convert to survTP format
   minTU <- pmin(TU[,1], TU[,2])
-  event1 <- minTU < cen
-  time1 <- ifelse(event1, minTU, cen)
-  event <- TU[,2] < cen
-  Stime <- ifelse(event, TU[,2], cen)
+  event1 <- minTU < C
+  time1 <- ifelse(event1, minTU, C)
+  event <- TU[,2] < C
+  Stime <- ifelse(event, TU[,2], C)
 
   TPmsm::survTP(time1, event1, Stime, event)
 }
@@ -99,4 +100,33 @@ eval_on_test <- function(sched_t, TU){
     lag_summary,
     loss_summary)
 }
+
+# Calculate distance between two schedules
+lqdist_sched <- function(sched_val1, sched_val2, M, q = 1) {
+  sched_val1 <- drop(sched_val1)
+  sched_val2 <- drop(sched_val2)
+  K1 <- length(sched_val1)
+  K2 <- length(sched_val2)
+  tibble(sched_val = c(sched_val1, sched_val2),
+         jump = c(rep(1 / K1, K1), rep(-1 / K2, K2))) %>%
+    arrange(sched_val) %>%
+    mutate(diff_ecdf = abs(cumsum(jump)),
+           len_intvl = lead(sched_val) - sched_val) %>%
+    summarise(dist = (sum(diff_ecdf ^ q * len_intvl, na.rm = TRUE) / M) ^
+                (1 / q)) %>%
+    unlist() %>%
+    setNames(NULL)
+}
+
+# Impute U
+adjust_U <- function(survdat, haz_drop) {
+  Stime_adj <- with(survdat[[1]],
+                    ifelse(event1 == 1 & time1 < Stime,
+                           time1 + (1 - haz_drop) * (Stime - time1),
+                           Stime))
+  with(survdat[[1]],
+       survTP(time1, event1, Stime_adj, event))
+}
+
+
 
