@@ -128,5 +128,40 @@ adjust_U <- function(survdat, haz_drop) {
        survTP(time1, event1, Stime_adj, event))
 }
 
+# Gernerate T and U given transition probability
+make_tu_with_tp <- function(n, tp) {
+  t(sapply(1:n, function(x) .make_tu_with_tp(tp)))
+}
+
+.make_tu_with_tp <- function(tp) {
+  min_tu <- .invF(tp$p00_0, tp$time)
+  if (is.na(min_tu$idx)) return(c(Inf, Inf))
+
+  p0 <- ifelse(min_tu$idx > 1,
+               tp$p00_0[min_tu$idx] / tp$p00_0[min_tu$idx - 1],
+               tp$p00_0[1])
+  p1 <- ifelse(min_tu$idx > 1,
+               tp$p01[min_tu$idx - 1, min_tu$idx],
+               tp$p01_0[1])
+  if (p0 + p1 > 1) {
+    warning("Probability > 1!")
+    return(c(0, 0))
+  }
+  if (runif(1) > p1 / (1 - p0)) {
+    return(c(Inf, min_tu$val))
+  }
+
+  t <- min_tu$val
+  u <- .invF(tp$p11[min_tu$idx, ], tp$time)$val
+  c(t, u)
+}
+
+.invF <- function(p, t) {
+  r <- runif(1)
+  idx <- which(p <= r)[1]
+  val <- ifelse(is.na(idx), Inf, t[idx])
+  list(idx = idx, val = val)
+}
+
 
 
