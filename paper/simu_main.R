@@ -58,6 +58,7 @@ do_run <- function(n, n_test, setting, maxK, sched_current){
        eval_res = eval_res)
 }
 
+
 # takes about 700 seconds (in parallel with 4 cores)
 system.time({
   res_all <- foreach(setting = settings) %do% {
@@ -80,7 +81,7 @@ system.time({
   }
 })
 # store the result
-# saveRDS(res_all, "rds/simu_1to3_40020200.rds")
+saveRDS(res_all, "rds/simu_1to3_40020200.rds")
 
 
 

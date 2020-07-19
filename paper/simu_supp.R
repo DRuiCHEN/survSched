@@ -144,7 +144,7 @@ res_adjustu <- readRDS("rds/simu_supp_adjustu.rds")
 labx <- function(s) {
   switch(s,
          delay = "Delay",
-         undetect = "Expected undetect proportion",
+         undetect = "Undetected proportion",
          adjustu = "Risk reduction r")
 }
 
