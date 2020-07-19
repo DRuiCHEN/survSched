@@ -4,10 +4,10 @@ library(doParallel)
 registerDoParallel()
 
 library(survSched)
-source('utils.R')
+source('paper/utils.R')
 
 ## Main result, evaluation on quantiles ----------------------------------------
-res_all <- read_rds("rds/simu_1to3_40020200.rds")
+res_all <- read_rds("paper/rds/simu_1to3_40020200.rds")
 
 tidy_eval_res <- do.call(bind_rows, lapply(res_all, function(r) r$eval_tib)) %>%
   select(lag_q1, loss_q1, lag_q3, loss_q3, K:setting) %>%
@@ -61,7 +61,7 @@ tidy_eval_res %>%
         legend.position = "bottom") +
   scale_x_continuous(breaks = seq(4, 20, by = 4))
 
-ggsave("fig/simu-supp-eval-quantile.pdf", width = 8, height = 6)
+ggsave("paper/fig/simu-supp-eval-quantile.pdf", width = 8, height = 6)
 
 
 
@@ -92,7 +92,7 @@ system.time({
              round = rep(i, length(K)))
   }
 })
-saveRDS(res_delay, "rds/simu_supp_delay.rds")
+saveRDS(res_delay, "paper/rds/simu_supp_delay.rds")
 # Missed detection about 150 s)
 system.time({
   prop <- seq(0, .3, by = .05)
@@ -111,7 +111,7 @@ system.time({
              round = rep(i, length(K)))
   }
 })
-saveRDS(res_undetect, "rds/simu_supp_undetect.rds")
+saveRDS(res_undetect, "paper/rds/simu_supp_undetect.rds")
 # Imputing U (about 180 s)
 system.time({
   haz_drop <- seq(0, .6, by = .1)
@@ -129,7 +129,7 @@ system.time({
              round = rep(i, length(K)))
   }
 })
-saveRDS(res_adjustu, "rds/simu_supp_adjustu.rds")
+saveRDS(res_adjustu, "paper/rds/simu_supp_adjustu.rds")
 
 
 
@@ -137,14 +137,14 @@ saveRDS(res_adjustu, "rds/simu_supp_adjustu.rds")
 ## Disturbance: plots ----------------------------------------
 Ks <- c(6, 10, 14)
 
-res_delay <- readRDS("rds/simu_supp_delay.rds")
-res_undetect <- readRDS("rds/simu_supp_undetect.rds")
-res_adjustu <- readRDS("rds/simu_supp_adjustu.rds")
+res_delay <- readRDS("paper/rds/simu_supp_delay.rds")
+res_undetect <- readRDS("paper/rds/simu_supp_undetect.rds")
+res_adjustu <- readRDS("paper/rds/simu_supp_adjustu.rds")
 
 labx <- function(s) {
   switch(s,
          delay = "Delay",
-         undetect = "Expected undetect proportion",
+         undetect = "Undetected proportion",
          adjustu = "Risk reduction r")
 }
 
@@ -164,7 +164,7 @@ for (s in c("delay", "undetect", "adjustu")) {
     } +
     labs(x = labx(s),
          y = 'Wasserstein distance') +
-    ggsave(paste0("fig/simu-supp-dist-", s, ".pdf"),
+    ggsave(paste0("paper/fig/simu-supp-dist-", s, ".pdf"),
            width = 8, height = 2.8)
 }
 
@@ -184,6 +184,6 @@ for (s in c("delay", "undetect", "adjustu")) {
     ylim(0, 16) +
     labs(y = "Schedule time (year)",
          x = labx(s))
-  ggsave(paste0("fig/simu-supp-sched-", s, ".pdf"),
+  ggsave(paste0("paper/fig/simu-supp-sched-", s, ".pdf"),
          width = 8, height = 2.8)
 }

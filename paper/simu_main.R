@@ -4,7 +4,7 @@ library(doParallel)
 registerDoParallel()
 
 library(survSched)
-source('utils.R')
+source('paper/utils.R')
 
 
 ## Simulation parameters ----------------------------------------
@@ -58,6 +58,7 @@ do_run <- function(n, n_test, setting, maxK, sched_current){
        eval_res = eval_res)
 }
 
+
 # takes about 700 seconds (in parallel with 4 cores)
 system.time({
   res_all <- foreach(setting = settings) %do% {
@@ -80,13 +81,13 @@ system.time({
   }
 })
 # store the result
-# saveRDS(res_all, "rds/simu_1to3_40020200.rds")
+saveRDS(res_all, "paper/rds/simu_1to3_40020200.rds")
 
 
 
 ## Plots ----------------------------------------
 # load stored results
-res_all <- readRDS("rds/simu_1to3_40020200.rds")
+res_all <- readRDS("paper/rds/simu_1to3_40020200.rds")
 
 # Plot schedules (Figure 2)
 Ks <- c(6, 10, 14)
@@ -121,7 +122,7 @@ ggplot(sched_tb) +
         strip.text.x = element_text(hjust = 0, size = 10)) +
   coord_flip()
 
-ggsave("fig/simu-sched-CI.pdf", width = 8, height = 2.6)
+ggsave("paper/fig/simu-sched-CI.pdf", width = 8, height = 2.6)
 
 
 # plot mean, with percentile as confidence band (Figure 3)
@@ -172,4 +173,4 @@ tidy_eval_res %>%
         legend.position = "bottom") +
   scale_x_continuous(breaks = seq(4, 20, by = 4))
 
-ggsave('fig/simu-eval.pdf', width = 8, height = 8)
+ggsave('paper/fig/simu-eval.pdf', width = 8, height = 8)
