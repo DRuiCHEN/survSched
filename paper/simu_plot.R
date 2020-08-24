@@ -89,4 +89,5 @@ tidy_eval_res %>%
         legend.position = "bottom") +
   scale_x_continuous(breaks = seq(4, 20, by = 4))
 
-ggsave('fig/simu-eval.pdf', width = 8, height = 8)
+# ggsave('fig/simu-eval.pdf', width = 8, height = 8)
+ggsave('fig/simu-eval-update.pdf', width = 8, height = 6)
